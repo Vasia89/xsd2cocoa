@@ -86,6 +86,7 @@
   <complexType name="simpletype">
     <sequence>
       <element name="read" type="xsd2cocoa:read" minOccurs="1" maxOccurs="1"/>
+      <element name="write" type="xsd2cocoa:write" minOccurs="1" maxOccurs="1"/>
     </sequence>
     <attribute name="name" type="string" use="required" />
     <attribute name="objType" type="string" use="required" />
@@ -96,6 +97,7 @@
   <complexType name="complextype">
     <sequence>
       <element name="read" type="xsd2cocoa:read" minOccurs="1" maxOccurs="1"/>
+      <element name="write" type="xsd2cocoa:write" minOccurs="1" maxOccurs="1"/>
       <element name="implementation" type="xsd2cocoa:implementation" minOccurs="1" maxOccurs="1">
         <annotation>
           <documentation>
@@ -118,6 +120,7 @@
   <complexType name="enumeration">
     <sequence>
       <element name="read" type="xsd2cocoa:read" minOccurs="1" maxOccurs="1"/>
+      <element name="write" type="xsd2cocoa:write" minOccurs="1" maxOccurs="1"/>
       <element name="implementation" type="xsd2cocoa:implementation" minOccurs="1" maxOccurs="1">
         <annotation>
           <documentation>
@@ -152,4 +155,13 @@
       <element name="value" type="string" minOccurs="0" maxOccurs="1"/>
     </sequence>
   </complexType>
+
+    <complexType name="write">
+        <sequence>
+            <element name="prefix" type="string" minOccurs="0" maxOccurs="1"/>
+            <element name="attribute" type="string" minOccurs="0" maxOccurs="1"/>
+            <element name="element" type="string" minOccurs="0" maxOccurs="1"/>
+            <element name="value" type="string" minOccurs="0" maxOccurs="1"/>
+        </sequence>
+    </complexType>
 </schema>

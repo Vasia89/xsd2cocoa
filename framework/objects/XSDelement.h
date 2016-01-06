@@ -27,6 +27,7 @@
 @property (readonly, nonatomic) NSNumber* maxOccurs;
 
 - (NSString*) readCodeForContent;
+- (NSString*) writeCodeForContent;
 - (NSString*) variableName; //in generated code
 
 - (BOOL) isSingleValue;

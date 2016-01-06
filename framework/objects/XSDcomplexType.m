@@ -17,6 +17,7 @@
 
 @property (readonly, nonatomic) NSString* complexTypeArrayType;
 @property (readonly, nonatomic) NSString* readComplexTypeElementTemplate;
+@property (readonly, nonatomic) NSString* writeComplexTypeElementTemplate;
 
 @end
 
@@ -295,6 +296,31 @@
     return str;
 }
 
+- (NSString *)writeSimpleContent {
+    id baseType = self.baseType;
+    NSMutableString *str = [NSMutableString stringWithString:@""];
+    if(baseType != nil) {
+        XSSimpleType *stype = [self.schema typeForName: baseType];
+        assert(stype);
+        if(stype != nil && [stype isKindOfClass:[XSSimpleType class]]) {
+            id substr = [stype writePrefixCode];
+            if(substr)
+                [str appendString:substr];
+            
+            if(str.length)
+                [str appendString:@"\n"];
+            
+            substr = [stype writeValueCode];
+            if(substr)
+                [str appendString:substr];
+        }
+        else
+            [str appendString:@"/*called by mistake*/"]; //:/ ?
+    }
+    
+    return str;
+}
+
 - (NSDictionary*) substitutionDict {
     return [NSDictionary dictionaryWithObject:self forKey:@"type"];
 }
@@ -304,7 +330,16 @@
     return [engine processTemplate: self.schema.readComplexTypeElementTemplate withVariables: dict];
 }
 
+- (NSString*) writeCodeForElement:(XSDelement *)element {
+    NSDictionary* dict = [NSDictionary dictionaryWithObject: element forKey: @"element"];
+    return [engine processTemplate: self.schema.writeComplexTypeElementTemplate withVariables: dict];
+}
+
 - (NSString*) readCodeForAttribute:(XSDattribute *)attribute {
+    return @"/* cant have a complex attribute */";
+}
+
+- (NSString *) writeCodeForAttribute:(XSDattribute *)attribute {
     return @"/* cant have a complex attribute */";
 }
 

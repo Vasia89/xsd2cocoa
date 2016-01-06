@@ -183,6 +183,21 @@
     return rtn;
 }
 
+- (NSString*) writeCodeForContent {
+    NSString *rtn;
+    
+    if (self.localType != nil) {
+        rtn = [self.localType writeCodeForElement:self];
+    } else if(self.hasEnumeration){
+        XSSimpleType* simpleTypeTemp = self.schemaType;
+        rtn = [simpleTypeTemp writeCodeForElement:self];
+    } else {
+        rtn = [[self.schema typeForName:self.type] writeCodeForElement:self];
+    }
+    
+    return rtn;
+}
+
 - (BOOL) isSingleValue {
     return [self.maxOccurs intValue] >= 0 && [self.maxOccurs intValue] <= 1;
 }

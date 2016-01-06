@@ -20,6 +20,21 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
       whitespaceAndNewlineCharacterSet]]; self.value =
       value;</value>
     </read>
+    <write>
+        <prefix />
+        <attribute><![CDATA[
+            {{ attribute.variableName }}AttrValue = [self convertAndValidateXMLString:self.{{ attribute.variableName }}];
+        ]]></attribute>
+        <element><![CDATA[
+            xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:{{ element.variableName }}Value]);
+        ]]></element>
+        <value><![CDATA[
+            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:self.value]);
+            if (rc < 0) {
+                return NO;
+            }
+        ]]></value>
+    </write>
   </simpletype>
   <simpletype name="anyURI" objType="NSURL" arrayType="NSArray">
     <read>
@@ -39,6 +54,21 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
       whitespaceAndNewlineCharacterSet]]; self.value = [NSURL
       URLWithString:value];</value>
     </read>
+    <write>
+        <prefix />
+        <attribute><![CDATA[
+            {{ attribute.variableName }}AttrValue = [self convertAndValidateXMLString:[self."{{ attribute.variableName }}" absoluteString]];
+        ]]></attribute>
+        <element><![CDATA[
+            xmlTextWriterWriteString(writer, (mlChar*)[self convertAndValidateXMLString:[self.value absoluteString]]);
+        ]]></element>
+        <value><![CDATA[
+            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[self.value absoluteString]]);
+            if (rc < 0) {
+                return NO;
+            }
+        ]]></value>
+    </write>
   </simpletype>
   <simpletype name="boolean" objType="NSNumber"
   arrayType="NSArray">
@@ -60,6 +90,19 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
       whitespaceAndNewlineCharacterSet]]; self.value = [NSNumber
       numberWithBool:[value isEqualToString:@"true"]];</value>
     </read>
+    <write>
+        <prefix />
+        <attribute>{{ attribute.variableName }}AttrValue = [self.{{ attribute.variableName }} boolValue] ? "true" : "false";</attribute>
+        <element><![CDATA[
+            xmlTextWriterWriteString(writer, (xmlChar*)([{{ element.variableName }}Value boolValue] ? "true" : "false"));
+        ]]></element>
+        <value><![CDATA[
+            int rc = xmlTextWriterWriteString(writer, (xmlChar*)([{{ element.variableName }}Value boolValue] ? "true" : "false"]]);
+            if (rc < 0) {
+                return NO;
+            }
+        ]]></value>
+    </write>
   </simpletype>
   <simpletype name="integer" objType="NSNumber"
   arrayType="NSArray">
@@ -83,6 +126,20 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
       whitespaceAndNewlineCharacterSet]]; self.value =
       [numFormatter numberFromString:value];</value>
     </read>
+    <write>
+        <prefix>NSNumberFormatter* numFormatter = [[NSNumberFormatter alloc] init];
+            numFormatter.numberStyle = NSNumberFormatterDecimalStyle;</prefix>
+        <attribute>{{ attribute.variableName }}AttrValue = [self convertAndValidateXMLString:[numFormatter stringFromNumber: self.{{ attribute.variableName }}]];</attribute>
+        <element><![CDATA[
+            xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[numFormatter stringFromNumber:{{ element.variableName }}Value]]);
+        ]]></element>
+        <value><![CDATA[
+            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[numFormatter stringFromNumber:self.value]]);
+            if (rc < 0) {
+                return NO;
+            }
+        ]]></value>
+    </write>
   </simpletype>
   <simpletype name="decimal" objType="NSNumber"
   arrayType="NSArray">
@@ -106,6 +163,20 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
       whitespaceAndNewlineCharacterSet]]; self.value =
       [decFormatter numberFromString: value];</value>
     </read>
+    <write>
+        <prefix>NSNumberFormatter* integerFormatter = [[NSNumberFormatter alloc] init];
+            integerFormatter.numberStyle = NSNumberFormatterDecimalStyle;</prefix>
+        <attribute>{{ attribute.variableName }}AttrValue = [self convertAndValidateXMLString:[integerFormatter stringFromNumber: self.{{ attribute.variableName }}]];</attribute>
+        <element><![CDATA[
+            xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[integerFormatter stringFromNumber: {{ element.variableName }}Value]]);
+        ]]></element>
+        <value><![CDATA[
+            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[integerFormatter stringFromNumber:self.value]]);
+            if (rc < 0) {
+                return NO;
+            }
+        ]]></value>
+    </write>
   </simpletype>
   <simpletype name="dateTime" objType="NSDate" arrayType="NSArray">
     <read>
@@ -128,6 +199,21 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
       whitespaceAndNewlineCharacterSet]]; self.value =
       [dateFormatter dateFromString:value];</value>
     </read>
+    <write>
+        <prefix>NSDateFormatter* dateFormatter = [[NSDateFormatter
+            alloc] init];
+            dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";</prefix>
+        <attribute>{{ attribute.variableName }}AttrValue = [self convertAndValidateXMLString:[dateFormatter stringFromDate:self.{{ attribute.variableName }}]];</attribute>
+        <element><![CDATA[
+            xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[dateFormatter stringFromDate:{{ element.variableName }}Value]]);
+        ]]></element>
+        <value><![CDATA[
+            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[dateFormatter stringFromDate:self.value]]);
+            if (rc < 0) {
+                return NO;
+            }
+        ]]></value>
+    </write>
   </simpletype>
   <simpletype name="date" objType="NSDate" arrayType="NSArray">
       <read>
@@ -152,6 +238,23 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
               whitespaceAndNewlineCharacterSet]]; self.value =
               [dateOnlyFormatter dateFromString:value];</value>
       </read>
+      <write>
+          <prefix>NSDateFormatter* dateOnlyFormatter = [[NSDateFormatter
+              alloc] init];
+              dateOnlyFormatter.dateFormat = @"yyyy-MM-dd";
+              dateOnlyFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
+          </prefix>
+          <attribute>{{ attribute.variableName }}AttrValue = [self convertAndValidateXMLString:[dateOnlyFormatter stringFromDate:self.{{ attribute.variableName }}]];</attribute>
+          <element><![CDATA[
+              xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[dateOnlyFormatter stringFromDate:{{ element.variableName }}Value]]);
+          ]]></element>
+          <value><![CDATA[
+              int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[dateOnlyFormatter stringFromDate:self.value]]);
+              if (rc < 0) {
+                return NO;
+              }
+          ]]></value>
+      </write>
   </simpletype>
   <simpletype name="time" objType="NSDate" arrayType="NSArray">
       <read>
@@ -176,6 +279,23 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
               whitespaceAndNewlineCharacterSet]]; self.value =
               [timeFormatter dateFromString:value];</value>
       </read>
+      <write>
+          <prefix>NSDateFormatter* timeFormatter = [[NSDateFormatter
+              alloc] init];
+              timeFormatter.dateFormat = @"HH:mm:ss";
+              timeFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
+          </prefix>
+          <attribute>{{ attribute.variableName }}AttrValue = [self convertAndValidateXMLString:[timeFormatter stringFromDate:self.{{ attribute.variableName }}]];</attribute>
+          <element><![CDATA[
+              xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[timeFormatter stringFromDate:{{ element.variableName }}Value]]);
+          ]]></element>
+          <value><![CDATA[
+              int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[timeFormatter stringFromDate:self.value]]);
+              if (rc < 0) {
+                return NO;
+              }
+          ]]></value>
+      </write>
   </simpletype>
   <!--complex type-->
   <complextype objType="NSObject-Subclass" arrayType="NSArray">
@@ -184,6 +304,12 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
         <![CDATA[{% if element.isSingleValue %}self.{{ element.variableName }} = [[{{ element.codeType }} alloc] initWithReader: reader];{% else %}[{{ element.variableName }}Array addObject: [[{{ element.schemaType.targetClassName }} alloc] initWithReader: reader]];{% /if %}]]>
         </element>
     </read>
+    <write>
+        <element>
+        <![CDATA[
+            [{{ element.variableName }}Value writeWithWriter:writer];]]>
+        </element>
+    </write>
     <implementation>
       <!--
 Name:          Header
@@ -242,6 +368,9 @@ this will be used to generate the class header files for the complex types.
 
         /* Method that is overidden by subclasses that want to extend the base type (xmlTextReaderPtr at the moment) */
         - (void) readAttributes: (void*) reader;
+        
+        /* Method serialize object to xml */
+        - (BOOL) writeWithWriter: (void*) writer;
 
         @end
         ]]>
@@ -256,6 +385,7 @@ this will be used to generate the class files for the complex types.
         <![CDATA[
         #import "{{ type.targetClassFileName }}.h"
         #import <libxml/xmlreader.h>
+        #import <libxml/xmlwriter.h>
         {% for complexType in type.complexTypesInUse %}
         #import "{{ complexType.targetClassFileName }}.h"{% /for %}
 
@@ -272,6 +402,97 @@ this will be used to generate the class files for the complex types.
 
         @implementation {{ type.targetClassName }}
 
+        - (BOOL) writeAttributes: (void*) writer {
+        {% if type.hasBaseClass %}
+        [super writeAttributes: writer];
+        {% /if %}
+        
+        {% for simpleType in type.simpleTypesInUse %}
+        {{ simpleType.writePrefixCode }}
+        {% /for %}
+        
+        {% for attribute in type.attributes %}
+        {% if attribute.writeCodeForAttribute.length %}
+        {% if attribute.hasEnumeration %}
+        if (self.{{ attribute.variableName }}) {
+            int rc = {{ attribute.writeCodeForAttribute }}
+            if (rc < 0) {
+                return NO;
+            }
+        }
+        {% else %}
+        if(self.{{ attribute.variableName }}) {
+            const char* {{ attribute.variableName }}AttrValue = NULL;
+            {{ attribute.writeCodeForAttribute }}
+            int rc = xmlTextWriterWriteAttribute(writer, (xmlChar*)"{{ attribute.name }}", (xmlChar*){{ attribute.variableName }}AttrValue);
+            if (rc < 0) {
+                return NO;
+            }
+        }
+        {% /if %}
+        {% else %}
+        NSLog(@"{{ attribute.variableName }}");
+        {% /if %}
+        {% /for %}
+        return YES;
+        }
+        
+        - (BOOL) writeElements: (xmlTextWriterPtr) writer {
+        {% if type.hasBaseClass %}
+        [super writeElements: writer];
+        {% /if %}
+        
+        {% for simpleType in type.simpleTypesInUse %}
+        {{ simpleType.writePrefixCode }}
+        {% /for %}
+        
+        {% for element in type.elements %}
+        {% if element.isSingleValue %}
+        if(self.{{ element.variableName }}) {
+        xmlTextWriterStartElement(writer, (xmlChar*)"{{ element.name }}");
+        id {{ element.variableName }}Value = self.{{ element.variableName }};
+            if ({{ element.variableName }}Value != nil) {
+                {{ element.writeCodeForContent }}
+            }
+            xmlTextWriterEndElement(writer);
+        }
+        {% else %}
+        for (id {{ element.variableName }}Value in self.{{ element.variableName }}) {
+            xmlTextWriterStartElement(writer, (xmlChar*)"{{ element.name }}");
+            if(![{{ element.variableName }}Value isKindOfClass:[NSNull class]]) {
+                {{ element.writeCodeForContent }}
+            }
+            xmlTextWriterEndElement(writer);
+        }	
+        {% /if %}
+        {% /for %}
+        
+        return YES;
+        }
+        
+        - (BOOL) writeWithWriter: (void *) writer {
+        
+        if (![self writeAttributes:writer]) {
+            return NO;
+        }
+        
+        {% if type.hasSimpleBaseClass %}
+        if (self.value){
+            {{ type.writeSimpleContent }}
+        }{% /if %}
+        
+        if (![self writeElements:writer]) {
+            return NO;
+        }
+        
+        return YES;
+        }
+        
+        - (const char *)convertAndValidateXMLString:(NSString*)unescapedString {
+            // rewrite this method when needed some additional validation
+            return [unescapedString UTF8String];
+        }
+        
         /**
         * Name:        readAttributes
         * Parameters:  (void *) - the Libxml's xmlTextReader pointer
@@ -410,7 +631,10 @@ this will be used to generate the class files for the complex types.
             
             /* Reads xml text specified by the given data and parses it, returning a {{ type.targetClassName }} */
             + ({{ type.targetClassName }}*){{ type.name }}FromData:(NSData*)data;
-            
+
+            /* Method will write object to data. */
+            + (NSData*)dataFrom{{ type.name }}:({{ type.targetClassName }}*){{ type.name }}Value;
+
             @end
             ]]>
         </header>
@@ -425,8 +649,60 @@ this will be used to generate the class files for the complex types.
         <![CDATA[
             #import "{{ type.targetClassFileName }}+File.h"
             #import <libxml/xmlreader.h>
+            #import <libxml/xmlwriter.h>
             
             @implementation {{ type.targetClassFileName }} (File)
+            
+            + (NSData*)dataFrom{{ type.name }}:({{ type.targetClassName }}*){{ type.name }}Value {
+            xmlBufferPtr buf = xmlBufferCreate();
+            if (buf == NULL) {
+                NSLog(@"Error creating the xml buffer.");
+                return nil;
+            }
+            
+            xmlTextWriterPtr writer = xmlNewTextWriterMemory(buf, 0);
+            if (writer == NULL) {
+                NSLog(@"Error creating the xml writer.");
+                return nil;
+            }
+            
+            int rc = xmlTextWriterStartDocument(writer, NULL, "UTF-8", NULL);
+            if (rc < 0) {
+                NSLog(@"Error at xmlTextWriterStartDocument.");
+                return nil;
+            }
+            xmlTextWriterSetIndent(writer, 1);
+            xmlTextWriterSetIndentString(writer, (xmlChar *)"\t");
+            
+            // Serialize object
+            xmlTextWriterStartElement(writer, (xmlChar*)"{{ type.name }}");
+            BOOL result = [{{ type.name }}Value writeWithWriter:writer];
+            
+            if (!result) {
+                xmlBufferFree(buf);
+                xmlCleanupCharEncodingHandlers();
+                xmlCleanupParser();
+                return nil;
+            }
+            
+            xmlTextWriterEndElement(writer);
+            
+            rc = xmlTextWriterEndDocument(writer);
+            if (rc < 0) {
+                NSLog(@"Error at xmlTextWriterEndDocument.");
+                return nil;
+            }
+            
+            int libxmlVersion = atoi(xmlParserVersion);
+            NSData *xmlData = [[NSData alloc] initWithBytes:(buf->content) length:(buf->use)];
+            //NSLog(@"%s", (const char *) buf->content);
+            
+            xmlBufferFree(buf);
+            xmlCleanupCharEncodingHandlers();
+            xmlCleanupParser();
+            
+            return xmlData;
+            }
             
             /**
             * Name:            FromURL
@@ -515,6 +791,22 @@ this will be used to generate the class files for the complex types.
             ]]>
         </value>
     </read>
+    <write>
+      <prefix />
+      <attribute>
+          <![CDATA[xmlTextWriterWriteAttribute(writer, (xmlChar*)"{{ attribute.name }}", (xmlChar*)[self convertAndValidateXMLString:{{ attribute.schemaType.enumerationName }}ToString(self.{{ attribute.variableName }})]);]]>
+      </attribute>
+      <element>
+          <![CDATA[if (self.{{ element.variableName }}) xmlTextWriterWriteElement(writer, (xmlChar*)"{{ element.name }}", (xmlChar*)[self convertAndValidateXMLString:{{ attribute.schemaType.enumerationName }}ToString(self.{{ element.variableName }})]);]]>
+      </element>
+      <value><![CDATA[
+          int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:{{ type.baseClass.enumerationName }}ToString(self.value]);
+          if (rc < 0) {
+            return NO;
+          }
+      ]]>
+      </value>
+    </write>
     <implementation>
       <header extension="h">
         <![CDATA[

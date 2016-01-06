@@ -18,4 +18,6 @@
 /* This is used for storing the code that is in our template for the base type */
 @property (readonly, nonatomic) NSString* readCodeForAttribute;
 
+/* This is used for storing the write code in our template */
+@property (readonly, nonatomic) NSString* writeCodeForAttribute;
 @end

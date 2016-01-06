@@ -21,7 +21,9 @@
 @property (readonly, nonatomic) NSString* readAttributeTemplate;
 @property (readonly, nonatomic) NSString* readElementTemplate;
 @property (readonly, nonatomic) NSString* readValueCode;
+@property (readonly, nonatomic) NSString* writeValueCode;
 @property (readonly, nonatomic) NSString* readPrefixCode;
+@property (readonly, nonatomic) NSString* writePrefixCode;
 @property (readonly, nonatomic) NSArray* includes;
 @property (strong, nonatomic) NSArray* enumerations;
 

@@ -67,6 +67,10 @@
     return [self.schemaType readCodeForAttribute: self];
 }
 
+- (NSString*) writeCodeForAttribute {
+    return [self.schemaType writeCodeForAttribute: self];
+}
+
 - (NSString*) variableName {
     return [XSDschema variableNameFromName:self.name multiple:NO];
 }
