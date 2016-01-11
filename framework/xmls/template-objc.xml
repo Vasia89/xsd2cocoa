@@ -23,13 +23,13 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
     <write>
         <prefix />
         <attribute><![CDATA[
-            {{ attribute.variableName }}AttrValue = [self convertAndValidateXMLString:self.{{ attribute.variableName }}];
+            {{ attribute.variableName }}AttrValue = [self.{{ attribute.variableName }} UTF8String];
         ]]></attribute>
         <element><![CDATA[
-            xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:{{ element.variableName }}Value]);
+            xmlTextWriterWriteString(writer, (xmlChar*)[{{ element.variableName }}Value UTF8String]);
         ]]></element>
         <value><![CDATA[
-            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:self.value]);
+            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self.value UTF8String]);
             if (rc < 0) {
                 return NO;
             }
@@ -57,13 +57,13 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
     <write>
         <prefix />
         <attribute><![CDATA[
-            {{ attribute.variableName }}AttrValue = [self convertAndValidateXMLString:[self."{{ attribute.variableName }}" absoluteString]];
+            {{ attribute.variableName }}AttrValue = [[self."{{ attribute.variableName }}" absoluteString] UTF8String];
         ]]></attribute>
         <element><![CDATA[
-            xmlTextWriterWriteString(writer, (mlChar*)[self convertAndValidateXMLString:[self.value absoluteString]]);
+            xmlTextWriterWriteString(writer, (mlChar*)[[self.value absoluteString] UTF8String]);
         ]]></element>
         <value><![CDATA[
-            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[self.value absoluteString]]);
+            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[self.value absoluteString] UTF8String]);
             if (rc < 0) {
                 return NO;
             }
@@ -129,12 +129,12 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
     <write>
         <prefix>NSNumberFormatter* numFormatter = [[NSNumberFormatter alloc] init];
             numFormatter.numberStyle = NSNumberFormatterDecimalStyle;</prefix>
-        <attribute>{{ attribute.variableName }}AttrValue = [self convertAndValidateXMLString:[numFormatter stringFromNumber: self.{{ attribute.variableName }}]];</attribute>
+        <attribute>{{ attribute.variableName }}AttrValue = [[numFormatter stringFromNumber: self.{{ attribute.variableName }}] UTF8String];</attribute>
         <element><![CDATA[
-            xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[numFormatter stringFromNumber:{{ element.variableName }}Value]]);
+            xmlTextWriterWriteString(writer, (xmlChar*)[[numFormatter stringFromNumber:{{ element.variableName }}Value] UTF8String]);
         ]]></element>
         <value><![CDATA[
-            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[numFormatter stringFromNumber:self.value]]);
+            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[numFormatter stringFromNumber:self.value] UTF8String]);
             if (rc < 0) {
                 return NO;
             }
@@ -166,12 +166,12 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
     <write>
         <prefix>NSNumberFormatter* integerFormatter = [[NSNumberFormatter alloc] init];
             integerFormatter.numberStyle = NSNumberFormatterDecimalStyle;</prefix>
-        <attribute>{{ attribute.variableName }}AttrValue = [self convertAndValidateXMLString:[integerFormatter stringFromNumber: self.{{ attribute.variableName }}]];</attribute>
+        <attribute>{{ attribute.variableName }}AttrValue = [[integerFormatter stringFromNumber: self.{{ attribute.variableName }}] UTF8String];</attribute>
         <element><![CDATA[
-            xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[integerFormatter stringFromNumber: {{ element.variableName }}Value]]);
+            xmlTextWriterWriteString(writer, (xmlChar*)[[integerFormatter stringFromNumber: {{ element.variableName }}Value] UTF8String]);
         ]]></element>
         <value><![CDATA[
-            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[integerFormatter stringFromNumber:self.value]]);
+            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[integerFormatter stringFromNumber:self.value] UTF8String]);
             if (rc < 0) {
                 return NO;
             }
@@ -203,12 +203,12 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
         <prefix>NSDateFormatter* dateFormatter = [[NSDateFormatter
             alloc] init];
             dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";</prefix>
-        <attribute>{{ attribute.variableName }}AttrValue = [self convertAndValidateXMLString:[dateFormatter stringFromDate:self.{{ attribute.variableName }}]];</attribute>
+        <attribute>{{ attribute.variableName }}AttrValue = [[dateFormatter stringFromDate:self.{{ attribute.variableName }}] UTF8String];</attribute>
         <element><![CDATA[
-            xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[dateFormatter stringFromDate:{{ element.variableName }}Value]]);
+            xmlTextWriterWriteString(writer, (xmlChar*)[[dateFormatter stringFromDate:{{ element.variableName }}Value] UTF8String]);
         ]]></element>
         <value><![CDATA[
-            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[dateFormatter stringFromDate:self.value]]);
+            int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[dateFormatter stringFromDate:self.value] UTF8String]);
             if (rc < 0) {
                 return NO;
             }
@@ -244,12 +244,12 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
               dateOnlyFormatter.dateFormat = @"yyyy-MM-dd";
               dateOnlyFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
           </prefix>
-          <attribute>{{ attribute.variableName }}AttrValue = [self convertAndValidateXMLString:[dateOnlyFormatter stringFromDate:self.{{ attribute.variableName }}]];</attribute>
+          <attribute>{{ attribute.variableName }}AttrValue = [[dateOnlyFormatter stringFromDate:self.{{ attribute.variableName }}] UTF8String];</attribute>
           <element><![CDATA[
-              xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[dateOnlyFormatter stringFromDate:{{ element.variableName }}Value]]);
+              xmlTextWriterWriteString(writer, (xmlChar*)[[dateOnlyFormatter stringFromDate:{{ element.variableName }}Value] UTF8String]);
           ]]></element>
           <value><![CDATA[
-              int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[dateOnlyFormatter stringFromDate:self.value]]);
+              int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[dateOnlyFormatter stringFromDate:self.value] UTF8String]);
               if (rc < 0) {
                 return NO;
               }
@@ -285,12 +285,12 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
               timeFormatter.dateFormat = @"HH:mm:ss";
               timeFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
           </prefix>
-          <attribute>{{ attribute.variableName }}AttrValue = [self convertAndValidateXMLString:[timeFormatter stringFromDate:self.{{ attribute.variableName }}]];</attribute>
+          <attribute>{{ attribute.variableName }}AttrValue = [[timeFormatter stringFromDate:self.{{ attribute.variableName }}] UTF8String];</attribute>
           <element><![CDATA[
-              xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[timeFormatter stringFromDate:{{ element.variableName }}Value]]);
+              xmlTextWriterWriteString(writer, (xmlChar*)[[timeFormatter stringFromDate:{{ element.variableName }}Value] UTF8String]);
           ]]></element>
           <value><![CDATA[
-              int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:[timeFormatter stringFromDate:self.value]]);
+              int rc = xmlTextWriterWriteString(writer, (xmlChar*)[[timeFormatter stringFromDate:self.value] UTF8String]);
               if (rc < 0) {
                 return NO;
               }
@@ -307,7 +307,10 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
     <write>
         <element>
         <![CDATA[
-            [{{ element.variableName }}Value writeWithWriter:writer];]]>
+            BOOL result = [{{ element.variableName }}Value writeWithWriter:writer];
+            if (!result) {
+                return NO;
+            }]]>
         </element>
     </write>
     <implementation>
@@ -459,9 +462,9 @@ this will be used to generate the class files for the complex types.
         {% else %}
         for (id {{ element.variableName }}Value in self.{{ element.variableName }}) {
             xmlTextWriterStartElement(writer, (xmlChar*)"{{ element.name }}");
-            if(![{{ element.variableName }}Value isKindOfClass:[NSNull class]]) {
-                {{ element.writeCodeForContent }}
-            }
+            
+            {{ element.writeCodeForContent }}
+            
             xmlTextWriterEndElement(writer);
         }	
         {% /if %}
@@ -486,11 +489,6 @@ this will be used to generate the class files for the complex types.
         }
         
         return YES;
-        }
-        
-        - (const char *)convertAndValidateXMLString:(NSString*)unescapedString {
-            // rewrite this method when needed some additional validation
-            return [unescapedString UTF8String];
         }
         
         /**
@@ -794,13 +792,13 @@ this will be used to generate the class files for the complex types.
     <write>
       <prefix />
       <attribute>
-          <![CDATA[xmlTextWriterWriteAttribute(writer, (xmlChar*)"{{ attribute.name }}", (xmlChar*)[self convertAndValidateXMLString:{{ attribute.schemaType.enumerationName }}ToString(self.{{ attribute.variableName }})]);]]>
+          <![CDATA[xmlTextWriterWriteAttribute(writer, (xmlChar*)"{{ attribute.name }}", (xmlChar*)[{{ attribute.schemaType.enumerationName }}ToString(self.{{ attribute.variableName }}) UTF8String]);]]>
       </attribute>
       <element>
-          <![CDATA[if (self.{{ element.variableName }}) xmlTextWriterWriteElement(writer, (xmlChar*)"{{ element.name }}", (xmlChar*)[self convertAndValidateXMLString:{{ attribute.schemaType.enumerationName }}ToString(self.{{ element.variableName }})]);]]>
+          <![CDATA[if (self.{{ element.variableName }}) xmlTextWriterWriteElement(writer, (xmlChar*)"{{ element.name }}", (xmlChar*)[{{ attribute.schemaType.enumerationName }}ToString(self.{{ element.variableName }}) UTF8String]);]]>
       </element>
       <value><![CDATA[
-          int rc = xmlTextWriterWriteString(writer, (xmlChar*)[self convertAndValidateXMLString:{{ type.baseClass.enumerationName }}ToString(self.value]);
+          int rc = xmlTextWriterWriteString(writer, (xmlChar*)[{{ type.baseClass.enumerationName }}ToString(self.value) UTF8String];
           if (rc < 0) {
             return NO;
           }
