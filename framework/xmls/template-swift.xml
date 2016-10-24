@@ -22,6 +22,21 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
         self.value = value]]>
         </value>
     </read>
+    <write>
+        <prefix/>
+        <attribute>
+            <![CDATA[let {{ attribute.variableName }}AttrValue = self.{{ attribute.variableName }}]]>
+        </attribute>
+        <element>
+            <![CDATA[xmlTextWriterWriteString(writer, {{ element.variableName }}Value)]]>
+        </element>
+        <value>
+            <![CDATA[statusCode = Int(xmlTextWriterWriteString(writer, value))
+                if statusCode < 0 {
+                    return statusCode
+                }]]>
+        </value>
+    </write>
   </simpletype>
   <simpletype name="anyURI" objType="NSURL" arrayType="[NSURL]">
     <read>
@@ -40,6 +55,22 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
         self.value = NSURL(string: value)]]>
         </value>
     </read>
+    <write>
+        <prefix/>
+        <attribute>
+            <![CDATA[let {{ attribute.variableName }}AttrValue: String? = String({{ attribute.variableName }})]]>
+        </attribute>
+        <element>
+            <![CDATA[let value = UnsafePointer<xmlChar>(NSString(string: {{ element.variableName }}Value.absoluteString).UTF8String)
+                xmlTextWriterWriteString(writer, value)]]>
+        </element>
+        <value>
+            <![CDATA[statusCode = xmlTextWriterWriteString(writer, value)
+                if (statusCode < 0) {
+                    return statusCode
+                }]]>
+        </value>
+    </write>
   </simpletype>
   <simpletype name="boolean" objType="Bool" arrayType="[Bool]">
     <read>
@@ -58,13 +89,29 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
         self.value = (value == "true")]]>
         </value>
     </read>
+    <write>
+        <prefix/>
+        <attribute>
+            <![CDATA[let {{ attribute.variableName }}AttrValue: String? = self.{{ attribute.variableName }}! ? "true" : "false"]]>
+        </attribute>
+        <element>
+            <![CDATA[xmlTextWriterWriteString(writer, ({{ element.variableName }}Value ? "true" : "false"))]]>
+        </element>
+        <value>
+            <![CDATA[statusCode = xmlTextWriterWriteString(writer, ({{ element.variableName }}Value ? "true" : "false"]]);
+                if (statusCode < 0) {
+                    return statusCode
+                }]]>
+        </value>
+    </write>
   </simpletype>
   <simpletype name="integer" objType="Int" arrayType="[Int]">
     <read>
       <prefix>
         <![CDATA[
         let numFormatter = NSNumberFormatter()
-        numFormatter.numberStyle = NSNumberFormatterStyle.DecimalStyle
+        numFormatter.numberStyle = .DecimalStyle
+        numFormatter.locale = self.locale
         ]]>
         </prefix>
       <attribute>
@@ -80,22 +127,40 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
         <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
         if value != nil {
             let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-            self.value = numFormatter.numberFromString(trimmed)
+            self.value = numFormatter.numberFromString(trimmed).integerValue
         }]]>
         </value>
     </read>
+    <write>
+        <prefix>
+            let numFormatter = NSNumberFormatter()
+            numFormatter.numberStyle = .DecimalStyle
+        </prefix>
+        <attribute>
+            <![CDATA[let {{ attribute.variableName }}AttrValue = numFormatter.stringFromNumber(self.{{ attribute.variableName }}!)]]>
+        </attribute>
+        <element>
+            <![CDATA[xmlTextWriterWriteString(writer, numFormatter.stringFromNumber({{ element.variableName }}Value))]]>
+        </element>
+        <value>
+            <![CDATA[statusCode = xmlTextWriterWriteString(writer, numFormatter.stringFromNumber:self.value))
+                if (statusCode < 0) {
+                    return statusCode
+                }]]>
+        </value>
+    </write>
   </simpletype>
   <simpletype name="decimal" objType="Double" arrayType="[Double]">
     <read>
       <prefix>
         <![CDATA[
         let decFormatter = NSNumberFormatter()
-        decFormatter.numberStyle = NSNumberFormatterStyle.DecimalStyle
-        decFormatter.decimalSeparator = "."]]>
+        decFormatter.numberStyle = .DecimalStyle
+        decFormatter.locale = self.locale]]>
         </prefix>
       <attribute>
         <![CDATA[
-        self.{{ attribute.variableName }} = decFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)]]>
+        self.{{ attribute.variableName }} = decFormatter.numberFromString(String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)!.doubleValue]]>
         </attribute>
       <element>
           <![CDATA[
@@ -106,35 +171,103 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
         <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
         if value != nil {
             let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-            self.value = decFormatter.numberFromString(trimmed)
+            self.value = decFormatter.numberFromString(trimmed)!.doubleValue
         }]]>
         </value>
     </read>
+    <write>
+        <prefix>
+            <![CDATA[let integerFormatter = NSNumberFormatter()
+                integerFormatter.numberStyle = .DecimalStyle]]>
+        </prefix>
+        <attribute>
+            <![CDATA[let {{ attribute.variableName }}AttrValue = integerFormatter.stringFromNumber(self.{{ attribute.variableName }}!)]]>
+        </attribute>
+        <element>
+            <![CDATA[xmlTextWriterWriteString(writer, integerFormatter.stringFromNumber({{ element.variableName }}Value))]]>
+        </element>
+        <value>
+            <![CDATA[statusCode = xmlTextWriterWriteString(writer, integerFormatter.stringFromNumber(self.value))
+                if (statusCode < 0) {
+                    return statusCode
+                }]]>
+        </value>
+    </write>
   </simpletype>
   <simpletype name="dateTime" objType="NSDate"
   arrayType="[NSDate]">
     <read>
       <prefix>
-        <![CDATA[let dateFormatter = NSDateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"]]>
-        </prefix>
+        <![CDATA[
+            let sRFC3339DateFormatterSubSeconds = NSDateFormatter()
+            sRFC3339DateFormatterSubSeconds.locale = self.locale
+            sRFC3339DateFormatterSubSeconds.dateFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.SSSSSSXXXXX"
+            sRFC3339DateFormatterSubSeconds.timeZone = NSTimeZone(forSecondsFromGMT: 0)
+            
+            let sRFC3339DateFormatter = NSDateFormatter()
+            sRFC3339DateFormatter.locale = self.locale
+            sRFC3339DateFormatter.dateFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ssXXXXX"
+            sRFC3339DateFormatterSubSeconds.timeZone = NSTimeZone(forSecondsFromGMT: 0)]]></prefix>
       <attribute>
         <![CDATA[
-        self.{{ attribute.variableName }} = dateFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue)]]>
+        self.{{ attribute.variableName }} = sRFC3339DateFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))! )
+            if(self.{{ attribute.variableName }} == nil) {
+            self.{{ attribute.variableName }} = sRFC3339DateFormatterSubSeconds.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)
+            }]]>
         </attribute>
       <element>
           <![CDATA[
-              {% if element.isSingleValue %}self.{{ element.variableName }} = dateFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
-              {% else %}{{ element.variableName }}Array.append(dateFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)!) //bad force unwrapping{% /if %}]]>
+              {% if element.isSingleValue %}self.{{ element.variableName }} = sRFC3339DateFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+              if(self.{{ element.variableName }} == nil) {
+                  self.{{ element.variableName }} = sRFC3339DateFormatterSubSeconds.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+              }
+              {% else %}var {{ element.variableName }}Temp = sRFC3339DateFormatter.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+              if({{element.variableName }}Temp == nil) {
+                  {{ element.variableName }}Temp = sRFC3339DateFormatterSubSeconds.dateFromString(String.fromCString(UnsafePointer<CChar>({{element.name}}ElementValue))!)
+              }
+              {{ element.variableName }}Array.append(!) //bad force unwrapping{% /if %}]]>
         </element>
       <value>
         <![CDATA[let value = String.fromCString(UnsafePointer<CChar>(contentValue))
         if value != nil {
             let trimmed = value!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-            self.value = dateFormatter.dateFromString(trimmed)
+            self.value = sRFC3339DateFormatter.dateFromString(trimmed)
+            if(!self.value) {
+                self.value = sRFC3339DateFormatterSubSeconds.dateFromString(trimmed)
+            }
         }]]>
         </value>
     </read>
+    <write>
+        <prefix>
+            <![CDATA[
+                let sRFC3339DateFormatter = NSDateFormatter()
+                sRFC3339DateFormatter.locale = self.locale
+                sRFC3339DateFormatter.dateFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ssXXXXX"
+                sRFC3339DateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)]]>
+        </prefix>
+        <attribute>
+            <![CDATA[
+                if self.{{ attribute.variableName }} {
+                {{ attribute.variableName }}AttrValue = sRFC3339DateFormatter.stringFromDate(self.{{ attribute.variableName }})
+                }]]>
+        </attribute>
+        <element>
+            <![CDATA[
+                if {{ element.variableName }}Value {
+                xmlTextWriterWriteString(writer, sRFC3339DateFormatter.stringFromDate({{ element.variableName }}Value))
+                }]]>
+        </element>
+        <value>
+            <![CDATA[
+                if let value = self.value {
+                statusCode = xmlTextWriterWriteString(writer, sRFC3339DateFormatter.stringFromDate(value))
+                if statusCode < 0 {
+                    return statusCode
+                }
+                }]]>
+        </value>
+    </write>
   </simpletype>
   <simpletype name="date" objType="NSDate"
       arrayType="[NSDate]">
@@ -143,11 +276,12 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
               <![CDATA[let dateOnlyFormatter = NSDateFormatter()
                   dateOnlyFormatter.dateFormat = "yyyy-MM-dd"
                   dateOnlyFormatter.timeZone = NSTimeZone(name:"UTC")
+                  dateOnlyFormatter.locale = self.locale
               ]]>
           </prefix>
           <attribute>
               <![CDATA[
-                  self.{{ attribute.variableName }} = dateOnlyFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue)]]>
+                  self.{{ attribute.variableName }} = dateOnlyFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)]]>
           </attribute>
           <element>
               <![CDATA[
@@ -162,6 +296,36 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
                   }]]>
           </value>
       </read>
+      <write>
+          <prefix>
+              NSDateFormatter* dateOnlyFormatter = [[NSDateFormatter alloc] init];
+              dateOnlyFormatter.dateFormat = @"yyyy-MM-dd";
+              dateOnlyFormatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
+              dateOnlyFormatter.locale = self.locale;
+          </prefix>
+          <attribute>
+              <![CDATA[
+                  if let {{ attribute.variableName }} = self.{{ attribute.variableName }} {
+                  {{ attribute.variableName }}AttrValue = dateOnlyFormatter.stringFromDate:{{ attribute.variableName }}
+                  }]]>
+          </attribute>
+          <element>
+              <![CDATA[
+                  if {{ element.variableName }}Value != nil {
+                  xmlTextWriterWriteString(writer, dateOnlyFormatter.stringFromDate:{{ element.variableName }}Value)
+                  }]]>
+          </element>
+          <value>
+              <![CDATA[
+                  if let value = self.value {
+                  statusCode = xmlTextWriterWriteString(writer, dateOnlyFormatter.stringFromDate:value)
+                  if (statusCode < 0) {
+                    return statusCode
+                  }
+                  }
+              ]]>
+          </value>
+      </write>
   </simpletype>
   <simpletype name="time" objType="NSDate"
       arrayType="[NSDate]">
@@ -170,11 +334,12 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
               <![CDATA[let timeOnlyFormatter = NSDateFormatter()
                   timeOnlyFormatter.dateFormat = "HH:mm:ss"
                   timeOnlyFormatter.timeZone = NSTimeZone(name:"UTC")
+                  timeOnlyFormatter.locale = self.locale
               ]]>
           </prefix>
           <attribute>
               <![CDATA[
-                  self.{{ attribute.variableName }} = timeOnlyFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue)]]>
+                  self.{{ attribute.variableName }} = timeOnlyFormatter.dateFromString( String.fromCString(UnsafePointer<CChar>({{ attribute.name }}AttrValue))!)]]>
           </attribute>
           <element>
               <![CDATA[
@@ -189,6 +354,37 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
                   }]]>
           </value>
       </read>
+      <write>
+          <prefix>
+              let timeFormatter = NSDateFormatter()
+              timeFormatter.dateFormat = "HH:mm:ss"
+              timeFormatter.timeZone = NSTimeZone(abbreviation:"UTC")
+          </prefix>
+          <attribute>
+              <![CDATA[
+                  if let {{ attribute.variableName }} = self.{{ attribute.variableName }} {
+                        {{ attribute.variableName }}AttrValue = timeFormatter.stringFromDate({{ attribute.variableName }})
+                  }
+              ]]>
+          </attribute>
+          <element>
+              <![CDATA[
+                  if {{ element.variableName }}Value != nil {
+                    xmlTextWriterWriteString(writer, timeFormatter.stringFromDate({{ element.variableName }}Value))
+                  }
+              ]]>
+          </element>
+          <value>
+              <![CDATA[
+                  if let value = self.value {
+                  statusCode = xmlTextWriterWriteString(writer, timeFormatter.stringFromDate(value))
+                  if (statusCode < 0) {
+                    return statusCode
+                  }
+                  }
+              ]]>
+          </value>
+      </write>
   </simpletype>
   <!--complex type-->
   <complextype objType="@objc-Subclass"
@@ -199,6 +395,14 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
         {% if element.isSingleValue %}self.{{ element.variableName }} = {{ element.codeType }}(reader: reader){% else %}{{ element.variableName }}Array.append({{ element.schemaType.targetClassName }}(reader: reader)){% /if %}]]>
         </element>
     </read>
+    <write>
+        <element>
+            <![CDATA[let statusCode : Int = {{ element.variableName }}Value.writeWithWriter(writer)
+                if statusCode < 0 {
+                    return statusCode
+                }]]>
+        </element>
+    </write>
     <implementation>
       <header extension=""></header>
       <class extension="swift">
@@ -206,7 +410,12 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
         import Foundation
 
         @objc
-        class {{ type.targetClassName }} {% if type.hasComplexBaseClass %}: {{ type.baseClass.targetClassName }} {%else %}: NSObject{% /if %}{
+        class {{ type.targetClassName }} {% if type.hasComplexBaseClass %}: {{ type.baseClass.targetClassName }} {% else %}: NSObject{% /if %}{
+            {% if type.hasComplexBaseClass %}
+            {% else %}
+            /** Property that sets the NSLocale used by formatters of this type. It defaults to enUSPOSIX */
+            var locale = NSLocale(localeIdentifier: "en_US_POSIX")
+            {% /if %}
             {% for attribute in type.attributes %}
             var {{ attribute.variableName }}: {% if attribute.hasEnumeration %}{{ attribute.schemaType.enumerationName }}{% else %}{{ attribute.codeType }}{% /if %}?
             {% /for %}
@@ -327,6 +536,83 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
                     return dict
                 }
                 
+                {% if type.hasComplexBaseClass %}override {% /if %}func writeAttributes(writer:COpaquePointer) -> Int {
+                {% if type.hasComplexBaseClass %}
+                super.writeAttributes(writer)
+                {% /if %}
+                
+                {% for simpleType in type.simpleTypesInUse %}
+                {{ simpleType.writePrefixCode }}
+                {% /for %}
+                
+                {% for attribute in type.attributes %}
+                {{ attribute.writeCodeForAttribute }}
+                if {% if attribute.hasDefault %}strcmp({{ attribute.variableName }}AttrValue!, "{{ attribute.defaultValue }}") != 0{% else %}!({{ attribute.variableName }}AttrValue ?? "").isEmpty{% /if %} {
+                let statusCode = Int(xmlTextWriterWriteAttribute(writer, "{{ attribute.name }}", {{ attribute.variableName }}AttrValue!))
+                if statusCode < 0 {
+                    return statusCode
+                }
+                }
+                {% /for %}
+                return 0
+                }
+                
+                {% if type.hasComplexBaseClass %}override {% /if %}func writeElements(writer:xmlTextWriterPtr) -> Int {
+                {% if type.hasComplexBaseClass %}
+                super.writeElements(writer)
+                {% /if %}
+                
+                {% for simpleType in type.simpleTypesInUse %}
+                {{ simpleType.writePrefixCode }}
+                {% /for %}
+                
+                {% for element in type.elements %}
+                {% if element.isSingleValue %}
+                {% if element.hasEnumeration %}
+                {{ element.writeCodeForContent }}
+                {% else %}
+                if let {{ element.variableName }}Value = self.{{ element.variableName }} {
+                xmlTextWriterStartElement(writer, "{{ element.name }}")
+                {{ element.writeCodeForContent }}
+                xmlTextWriterEndElement(writer)
+                }
+                {% /if %}
+                {% else %}
+                if let binding{{ element.variableName }} = self.{{ element.variableName }} {
+                for {{ element.variableName }}Value in binding{{ element.variableName }} {
+                xmlTextWriterStartElement(writer, "{{ element.name }}")
+                
+                {{ element.writeCodeForContent }}
+                
+                xmlTextWriterEndElement(writer)
+                }
+                }
+                {% /if %}
+                {% /for %}
+                
+                return 0
+                }
+                
+                {% if type.hasComplexBaseClass %}override {% /if %}func writeWithWriter(writer:COpaquePointer) -> Int {
+                var statusCode = 0
+                
+                statusCode = self.writeAttributes(writer)
+                if statusCode < 0 {
+                    return statusCode
+                }
+                
+                statusCode = self.writeElements(writer)
+                if statusCode < 0 {
+                    return statusCode
+                }
+                
+                {% if type.hasSimpleBaseClass %}
+                if let value = self.value {
+                {{ type.writeSimpleContent }}
+                }{% /if %}
+                
+                return statusCode
+                }
             }
             ]]>
         </class>
@@ -337,27 +623,63 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
         <![CDATA[
             import Foundation
             
+            let kGlobalElementNamesArray = ["##elements##"{% for element in type.globalElements %},"{{ element.name }}"{% /for %}]
+
             extension {{ type.targetClassFileName }} {
+            
+                /**
+                * Name:            FromURL
+                * Parameters:      NSURL - the location of the XML file as a NSURL representation
+                * Returns:         A generated {{ type.targetClassName }} object
+                * Description:     Generate a {{ type.targetClassName }} object from the path
+                *                  specified by the user
+                */
                 class func {{ type.name }}FromURL(url:NSURL) -> {{ type.targetClassName }}? {
                     let s = (url.absoluteString as NSString).UTF8String
                     let reader = xmlReaderForFile( s, nil, 0/*options*/)
+                    var ret: Int32
+                    var obj: {{ type.targetClassName }}? = nil
                     
                     if(reader != nil) {
-                        let ret = xmlTextReaderRead(reader)
-                        if(ret == 1/*XML_READER_TYPE_ELEMENT*/) {
-                            return {{ type.targetClassName }}(reader: reader)
-                        }
+                        //find the correct root
+                        repeat {
+                            ret = xmlTextReaderRead(reader)
+                            if(ret == 1/*XML_READER_TYPE_ELEMENT*/) {
+                                let elementNameXmlChar = xmlTextReaderConstLocalName(reader)
+                                let elementName = String.fromCString(UnsafePointer<CChar>(elementNameXmlChar))
+                                let array = [kGlobalElementNamesArray]
+                                let predicate = NSPredicate(format: "SELF IN %@", argumentArray: array)
+                                if(predicate.evaluateWithObject(elementName)) {
+                                    obj = {{ type.targetClassName }}(reader: reader)
+                                    break
+                                }
+                            }
+                        } while(ret != 0)
                         xmlFreeTextReader(reader)
                     }
                     
-                    return nil
+                    return obj
                 }
                 
+                /**
+                * Name:            FromFile
+                * Parameters:      String - the location of the XML file as a string
+                * Returns:         A generated {{ type.targetClassName }} object
+                * Description:     Generate a {{ type.targetClassName }} object from the path
+                *                  specified by the user
+                */
                 class func {{ type.name }}FromFile(path:String) -> {{ type.targetClassName }}? {
                     let url = NSURL(fileURLWithPath:path)
                     return self.{{ type.name }}FromURL(url)
                 }
                 
+                /**
+                * Name:            FromData:
+                * Parameters:      NSData
+                * Returns:         A generated {{ type.targetClassName }} object
+                * Description:     Generate the {{ type.targetClassName }} object from the NSData
+                *                  object generated from the XML.
+                */
                 class func {{ type.name }}FromData(data:NSData) -> {{ type.targetClassName }}? {
                     let bytes = UnsafePointer<Int8>(data.bytes)
                     let length = Int32(data.length)
@@ -373,6 +695,57 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
                     
                     return nil
                 }
+                
+                class func dataFrom{{ type.name }}({{ type.name }}Value:{{ type.targetClassName }}) -> NSData? {
+                    let buf = xmlBufferCreate()
+                    if buf == nil {
+                        print("Error creating the xml buffer.")
+                        return nil
+                    }
+                
+                    let writer = xmlNewTextWriterMemory(buf, 0)
+                    if writer == nil {
+                        print("Error creating the xml writer.")
+                        return nil
+                    }
+                
+                    var rc = Int(xmlTextWriterStartDocument(writer, "1.0", "utf-8", nil))
+                    if rc < 0 {
+                        print("Error at xmlTextWriterStartDocument.")
+                        return nil;
+                    }
+                    xmlTextWriterSetIndent(writer, 1)
+                    xmlTextWriterSetIndentString(writer, UnsafePointer<xmlChar>(NSString(stringLiteral: "\t").UTF8String))
+                
+                
+                    // Serialize object
+                    let {{ type.name }}Name = UnsafePointer<xmlChar>(NSString(stringLiteral: "{{ type.name }}").UTF8String)
+                    let {{ type.name }}URLStr = UnsafePointer<xmlChar>(NSString(stringLiteral: "{{ type.schema.targetNamespace }}").UTF8String)
+                    
+                    xmlTextWriterStartElementNS(writer, nil, {{ type.name }}Name, {{ type.name }}URLStr)
+                    let resultStatusCode = {{ type.name }}Value.writeWithWriter(writer)
+                
+                    if resultStatusCode < 0 {
+                        xmlBufferFree(buf)
+                        return nil
+                    }
+                
+                    xmlTextWriterEndElement(writer)
+                
+                    rc = Int(xmlTextWriterEndDocument(writer))
+                    if rc < 0 {
+                        print("Error at xmlTextWriterEndDocument.")
+                        return nil
+                    }
+                
+                    let xmlData = NSData(bytes: buf.memory.content, length: Int(buf.memory.use))
+                    //print(UnsafePointer<String>(buf.memory.content))
+                
+                    xmlBufferFree(buf)
+                
+                    return xmlData
+                }
+                
             }
             ]]>
         </class>
@@ -399,6 +772,24 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
             }]]>
         </value>
     </read>
+    <write>
+        <prefix/>
+        <attribute>
+            <![CDATA[var {{ attribute.variableName }}AttrValue: String?
+                if self.{{ attribute.variableName }} != .Unknown {
+                {{ attribute.variableName }}AttrValue = {{ attribute.schemaType.enumerationName }}.toString(self.{{ attribute.variableName }}!)
+                }]]>
+        </attribute>
+        <element>
+            <![CDATA[xmlTextWriterWriteElement(writer, "{{ element.name }}", {{ attribute.schemaType.enumerationName }}.toString(self.{{ element.variableName }}))]]>
+        </element>
+        <value>
+            <![CDATA[statusCode = Int(xmlTextWriterWriteString(writer, {{ type.baseClass.enumerationName }}.toString(self.value))
+                if statusCode < 0 {
+                    return statusCode
+                }]]>
+        </value>
+    </write>
     <implementation>
       <header extension=""></header>
       <class extension="swift">
@@ -419,7 +810,11 @@ xsi:schemaLocation="http://www.example.com/xsd2cocoa template.xsd">
                 
                 static func fromString(enumString:String?) -> {{ type.enumerationName }} {
                     if var enumString = enumString {
-                        if(NSNumberFormatter().numberFromString(enumString) != nil) {
+                        let locale = NSLocale(localeIdentifier: "en_US_POSIX")
+                        let numFormatter = NSNumberFormatter()
+                        numFormatter.locale = locale
+                        
+                        if(numFormatter.numberFromString(enumString) != nil) {
                             enumString = "Value\(enumString)"
                         }
                         if let i = namesArray.indexOf(enumString) {
